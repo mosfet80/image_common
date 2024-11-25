@@ -2,8 +2,8 @@
 Changelog for package image_transport_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.2 (2024-11-25)
+------------------
 * Add in python3-dev build dependency (`#334 <https://github.com/ros-perception/image_common/issues/334>`_)
 * Contributors: Chris Lalancette
 
