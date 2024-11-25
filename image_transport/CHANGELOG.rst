@@ -2,6 +2,9 @@
 Changelog for package image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.0.1 (2024-10-10)
 ------------------
 * feat: python bindings for image_transport and publish (`#323 <https://github.com/ros-perception/image_common/issues/323>`_)
