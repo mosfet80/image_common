@@ -2,6 +2,9 @@
 Changelog for package image_transport_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.0.3 (2024-11-25)
 ------------------
 
