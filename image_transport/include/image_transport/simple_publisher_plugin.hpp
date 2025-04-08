@@ -127,6 +127,25 @@ protected:
     simple_impl_->pub_ = node->create_publisher<M>(transport_topic, qos, options);
   }
 
+  void advertiseImpl(
+    RequiredInterfaces node_interfaces,
+    const std::string & base_topic,
+    rmw_qos_profile_t custom_qos,
+    rclcpp::PublisherOptions options) override
+  {
+    std::string transport_topic = getTopicToAdvertise(base_topic);
+    simple_impl_ = std::make_unique<SimplePublisherPluginImpl>(node_interfaces);
+
+    RCLCPP_DEBUG(simple_impl_->logger_, "getTopicToAdvertise: %s", transport_topic.c_str());
+    auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(custom_qos), custom_qos);
+    auto parameters_interface = node_interfaces.get_node_parameters_interface();
+    auto topics_interface = node_interfaces.get_node_topics_interface();
+    simple_impl_->pub_ = rclcpp::create_publisher<M>(
+      parameters_interface,
+      topics_interface,
+      transport_topic, qos, options);
+  }
+
   typedef typename rclcpp::Publisher<M>::SharedPtr PublisherT;
 
   //! Generic function for publishing the internal message type.
@@ -195,7 +214,14 @@ private:
     {
     }
 
+    explicit  SimplePublisherPluginImpl(RequiredInterfaces required_interfaces)
+    : required_interfaces_(required_interfaces),
+      logger_(required_interfaces.get_node_logging_interface()->get_logger())
+    {
+    }
+
     rclcpp::Node * node_;
+    RequiredInterfaces required_interfaces_;
     rclcpp::Logger logger_;
     PublisherT pub_;
   };

@@ -34,6 +34,7 @@
 
 #include "rclcpp/node.hpp"
 
+#include "image_transport/node_interfaces.hpp"
 #include "image_transport/visibility_control.hpp"
 
 namespace image_transport
@@ -64,6 +65,32 @@ public:
     const std::string & parameter_name = "image_transport")
   {
     node->get_parameter_or<std::string>(parameter_name, transport_, default_transport);
+  }
+
+  /**
+   * \brief Constructor.
+   *
+   * The default transport can be overridden by setting a certain parameter to the
+   * name of the desired transport. By default this parameter is named "image_transport"
+   * in the node's local namespace. For consistency across ROS applications, the
+   * name of this parameter should not be changed without good reason.
+   *
+   * @param node Node to use when looking up the transport parameter.
+   * @param default_transport Preferred transport to use
+   * @param parameter_name The name of the transport parameter
+   */
+  IMAGE_TRANSPORT_PUBLIC
+  TransportHints(
+    RequiredInterfaces node_interfaces,
+    const std::string & default_transport = "raw",
+    const std::string & parameter_name = "image_transport")
+  {
+    if (node_interfaces.get_node_parameters_interface()->has_parameter(parameter_name)) {
+      transport_ =
+        node_interfaces.get_node_parameters_interface()->get_parameter(parameter_name).as_string();
+    } else {
+      transport_ = default_transport;
+    }
   }
 
   IMAGE_TRANSPORT_PUBLIC

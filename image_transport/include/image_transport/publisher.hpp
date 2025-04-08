@@ -38,6 +38,7 @@
 #include "sensor_msgs/msg/image.hpp"
 
 #include "image_transport/exception.hpp"
+#include "image_transport/node_interfaces.hpp"
 #include "image_transport/loader_fwds.hpp"
 #include "image_transport/single_subscriber_publisher.hpp"
 #include "image_transport/visibility_control.hpp"
@@ -71,6 +72,14 @@ public:
   IMAGE_TRANSPORT_PUBLIC
   Publisher(
     rclcpp::Node * nh,
+    const std::string & base_topic,
+    PubLoaderPtr loader,
+    rmw_qos_profile_t custom_qos,
+    rclcpp::PublisherOptions options = rclcpp::PublisherOptions());
+
+  IMAGE_TRANSPORT_PUBLIC
+  Publisher(
+    RequiredInterfaces node_interfaces,
     const std::string & base_topic,
     PubLoaderPtr loader,
     rmw_qos_profile_t custom_qos,

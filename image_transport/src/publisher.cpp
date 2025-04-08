@@ -41,6 +41,7 @@
 #include "pluginlib/class_loader.hpp"
 
 #include "image_transport/camera_common.hpp"
+#include "image_transport/node_interfaces.hpp"
 #include "image_transport/publisher_plugin.hpp"
 
 namespace image_transport
@@ -50,6 +51,12 @@ struct Publisher::Impl
 {
   explicit Impl(rclcpp::Node * node)
   : logger_(node->get_logger()),
+    unadvertised_(false)
+  {
+  }
+
+  explicit Impl(RequiredInterfaces required_interfaces)
+  : logger_(required_interfaces.get_node_logging_interface()->get_logger()),
     unadvertised_(false)
   {
   }
@@ -95,6 +102,72 @@ struct Publisher::Impl
   std::vector<std::shared_ptr<PublisherPlugin>> publishers_;
   bool unadvertised_;
 };
+
+Publisher::Publisher(
+  RequiredInterfaces node_interfaces, const std::string & base_topic,
+  PubLoaderPtr loader, rmw_qos_profile_t custom_qos,
+  rclcpp::PublisherOptions options)
+: impl_(std::make_shared<Impl>(node_interfaces))
+{
+  // Resolve the name explicitly because otherwise the compressed topics don't remap
+  // properly (#3652).
+  std::string image_topic =
+    node_interfaces.get_node_topics_interface()->resolve_topic_name(base_topic);
+  impl_->base_topic_ = image_topic;
+  impl_->loader_ = loader;
+
+  auto ns_len = std::string(node_interfaces.get_node_base_interface()->get_namespace()).length();
+  std::string param_base_name = image_topic.substr(ns_len);
+  std::replace(param_base_name.begin(), param_base_name.end(), '/', '.');
+  if (param_base_name.front() == '.') {
+    param_base_name = param_base_name.substr(1);
+  }
+  rclcpp::ParameterValue allowlist_vec_param;
+  std::vector<std::string> allowlist_vec;
+  std::set<std::string> allowlist;
+  std::vector<std::string> all_transport_names;
+  for (const auto & lookup_name : loader->getDeclaredClasses()) {
+    all_transport_names.emplace_back(erase_last_copy(lookup_name, "_pub"));
+  }
+  try {
+    rclcpp::ParameterValue default_value = rclcpp::ParameterValue(all_transport_names);
+    allowlist_vec_param = node_interfaces.get_node_parameters_interface()->declare_parameter(
+      param_base_name + ".enable_pub_plugins",
+      default_value);
+    allowlist_vec = allowlist_vec_param.get<std::vector<std::string>>();
+  } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException &) {
+    RCLCPP_DEBUG_STREAM(
+      node_interfaces.get_node_logging_interface()->get_logger(),
+      param_base_name << ".enable_pub_plugins" << " was previously declared"
+    );
+    allowlist_vec =
+      node_interfaces.get_node_parameters_interface()->get_parameter(
+      param_base_name +
+      ".enable_pub_plugins").get_value<std::vector<std::string>>();
+  }
+  for (size_t i = 0; i < allowlist_vec.size(); ++i) {
+    allowlist.insert(allowlist_vec[i]);
+  }
+
+  for (const auto & transport_name : allowlist) {
+    const auto & lookup_name = transport_name + "_pub";
+    try {
+      auto pub = loader->createUniqueInstance(lookup_name);
+      pub->advertise(node_interfaces, image_topic, custom_qos, options);
+      impl_->publishers_.push_back(std::move(pub));
+    } catch (const std::runtime_error & e) {
+      RCLCPP_ERROR(
+        impl_->logger_, "Failed to load plugin %s, error string: %s\n",
+        lookup_name.c_str(), e.what());
+    }
+  }
+
+  if (impl_->publishers_.empty()) {
+    throw Exception(
+            "No plugins found! Does `rospack plugins --attrib=plugin "
+            "image_transport` find any packages?");
+  }
+}
 
 Publisher::Publisher(
   rclcpp::Node * node, const std::string & base_topic,

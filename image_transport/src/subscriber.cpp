@@ -52,6 +52,13 @@ struct Subscriber::Impl
   {
   }
 
+  Impl(RequiredInterfaces required_interfaces, SubLoaderPtr loader)
+  : logger_(required_interfaces.get_node_logging_interface()->get_logger()),
+    loader_(loader),
+    unsubscribed_(false)
+  {
+  }
+
   ~Impl()
   {
     shutdown();
@@ -124,6 +131,53 @@ Subscriber::Subscriber(
   // Tell plugin to subscribe.
   RCLCPP_DEBUG(impl_->logger_, "Subscribing to: %s\n", image_topic.c_str());
   impl_->subscriber_->subscribe(node, image_topic, callback, custom_qos, options);
+}
+
+Subscriber::Subscriber(
+  RequiredInterfaces node_interfaces,
+  const std::string & base_topic,
+  const Callback & callback,
+  SubLoaderPtr loader,
+  const std::string & transport,
+  rmw_qos_profile_t custom_qos,
+  rclcpp::SubscriptionOptions options)
+: impl_(std::make_shared<Impl>(node_interfaces, loader))
+{
+  // Load the plugin for the chosen transport.
+  impl_->lookup_name_ = SubscriberPlugin::getLookupName(transport);
+  try {
+    impl_->subscriber_ = loader->createSharedInstance(impl_->lookup_name_);
+  } catch (pluginlib::PluginlibException & e) {
+    throw TransportLoadException(impl_->lookup_name_, e.what());
+  }
+
+  std::string image_topic =
+    node_interfaces.get_node_topics_interface()->resolve_topic_name(base_topic);
+
+  // Try to catch if user passed in a transport-specific topic as base_topic.
+
+  size_t found = image_topic.rfind('/');
+  if (found != std::string::npos) {
+    std::string transport = image_topic.substr(found + 1);
+    std::string plugin_name = SubscriberPlugin::getLookupName(transport);
+    std::vector<std::string> plugins = loader->getDeclaredClasses();
+    if (std::find(plugins.begin(), plugins.end(), plugin_name) != plugins.end()) {
+      std::string real_base_topic = image_topic.substr(0, found);
+
+      RCLCPP_WARN(
+        impl_->logger_,
+        "[image_transport] It looks like you are trying to subscribe directly to a "
+        "transport-specific image topic '%s', in which case you will likely get a connection "
+        "error. Try subscribing to the base topic '%s' instead with parameter ~image_transport "
+        "set to '%s' (on the command line, _image_transport:=%s). "
+        "See http://ros.org/wiki/image_transport for details.",
+        image_topic.c_str(), real_base_topic.c_str(), transport.c_str(), transport.c_str());
+    }
+  }
+
+  // Tell plugin to subscribe.
+  RCLCPP_DEBUG(impl_->logger_, "Subscribing to: %s\n", image_topic.c_str());
+  impl_->subscriber_->subscribe(node_interfaces, image_topic, callback, custom_qos, options);
 }
 
 std::string Subscriber::getTopic() const
