@@ -2,8 +2,8 @@
 Changelog for package image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.1 (2025-04-09)
+-------------------
 * Switch to (non deprecated) hpp headers of pluginlib (`#244 <https://github.com/ros-perception/image_common/issues/244>`_)
 * Switch to new boost/bind/bind.hpp (`#227 <https://github.com/ros-perception/image_common/issues/227>`_)
 * Specifically defined boost filesystem dependency (`#223 <https://github.com/ros-perception/image_common/issues/223>`_)

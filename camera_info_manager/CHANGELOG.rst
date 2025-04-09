@@ -2,8 +2,8 @@
 Changelog for package camera_info_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.1 (2025-04-09)
+-------------------
 * Revert "Virtualize CameraInfoManager  (`#234 <https://github.com/ros-perception/image_common/issues/234>`_)" (`#353 <https://github.com/ros-perception/image_common/issues/353>`_)
   This reverts commit e9c8c3246007d7717708b5267e1e2e909e4c0694.
   It cannot be released into ROS Noetic because it breaks ABI.

@@ -2,8 +2,8 @@
 Changelog for package camera_calibration_parsers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.1 (2025-04-09)
+-------------------
 * Add support for missing CameraInfo.msg fields (`#175 <https://github.com/ros-perception/image_common/issues/175>`_)
 * Drop pkg-config logic to find yaml-cpp. (`#280 <https://github.com/ros-perception/image_common/issues/280>`_)
 * Contributors: Mike Purvis, UniBwTAS
