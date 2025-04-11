@@ -417,7 +417,6 @@ private:
 
 struct ImageTransport::Impl
 {
-  rclcpp::Node::SharedPtr node_{nullptr};
   RequiredInterfaces required_interfaces_;
 };
 

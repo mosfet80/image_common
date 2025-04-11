@@ -31,13 +31,19 @@
 
 #include <rclcpp/node_interfaces/node_interfaces.hpp>
 
+#include <rclcpp/node_interfaces/node_base_interface.hpp>
+#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/node_interfaces/node_timers_interface.hpp>
+#include <rclcpp/node_interfaces/node_topics_interface.hpp>
+
 namespace image_transport
 {
+using NodeBaseInterface = rclcpp::node_interfaces::NodeBaseInterface;
 using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
 using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
 using NodeTimersInterface = rclcpp::node_interfaces::NodeTimersInterface;
 using NodeTopicsInterface = rclcpp::node_interfaces::NodeTopicsInterface;
-using NodeBaseInterface = rclcpp::node_interfaces::NodeBaseInterface;
 
 using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
   NodeBaseInterface,

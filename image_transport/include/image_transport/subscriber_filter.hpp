@@ -132,11 +132,7 @@ public:
     rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
     rclcpp::SubscriptionOptions options = rclcpp::SubscriptionOptions())
   {
-    unsubscribe();
-    sub_ = image_transport::create_subscription(
-      node, base_topic,
-      std::bind(&SubscriberFilter::cb, this, std::placeholders::_1), transport, custom_qos,
-      options);
+    subscribe(RequiredInterfaces(*node), base_topic, transport, custom_qos, options);
   }
 
   /**

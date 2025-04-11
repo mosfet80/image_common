@@ -168,7 +168,7 @@ TEST_F(TestQosOverrideLifecycle, qos_override_subscriber_with_options) {
   sub.shutdown();
 
   test_rclcpp::RequiredInterfacesTest required_test_qos_override_interfaces(
-    *qos_override_pub_node_);
+    *qos_override_sub_node_);
   sub = image_transport::create_subscription(
     required_test_qos_override_interfaces, "camera/image", fcn, "raw", rmw_qos_profile_default,
     options);

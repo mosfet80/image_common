@@ -172,9 +172,8 @@ ImageTransport::ImageTransport(const ImageTransport & other)
 : impl_(std::make_unique<Impl>(*other.impl_)) {}
 
 ImageTransport::ImageTransport(rclcpp::Node::SharedPtr node)
-: impl_(std::make_unique<ImageTransport::Impl>())
+: ImageTransport(RequiredInterfaces(*node))
 {
-  impl_->node_ = node;
 }
 
 ImageTransport::ImageTransport(RequiredInterfaces node_interfaces)
@@ -191,11 +190,7 @@ Publisher ImageTransport::advertise(const std::string & base_topic, uint32_t que
   (void) latch;
   rmw_qos_profile_t custom_qos = rmw_qos_profile_default;
   custom_qos.depth = queue_size;
-  if (impl_->node_ != nullptr) {
-    return create_publisher(impl_->node_.get(), base_topic, custom_qos);
-  } else {
-    return create_publisher(impl_->required_interfaces_, base_topic, custom_qos);
-  }
+  return create_publisher(impl_->required_interfaces_, base_topic, custom_qos);
 }
 
 Publisher ImageTransport::advertise(
@@ -204,11 +199,7 @@ Publisher ImageTransport::advertise(
 {
   // TODO(ros2) implement when resolved: https://github.com/ros2/ros2/issues/464
   (void) latch;
-  if (impl_->node_ != nullptr) {
-    return create_publisher(impl_->node_.get(), base_topic, custom_qos);
-  } else {
-    return create_publisher(impl_->required_interfaces_, base_topic, custom_qos);
-  }
+  return create_publisher(impl_->required_interfaces_, base_topic, custom_qos);
 }
 
 Subscriber ImageTransport::subscribe(
@@ -219,17 +210,10 @@ Subscriber ImageTransport::subscribe(
   const rclcpp::SubscriptionOptions options)
 {
   (void) tracked_object;
-  if (impl_->node_ != nullptr) {
-    return create_subscription(
-      impl_->node_.get(), base_topic, callback,
-      getTransportOrDefault(transport_hints), custom_qos,
-      options);
-  } else {
-    return create_subscription(
-      impl_->required_interfaces_, base_topic, callback,
-      getTransportOrDefault(transport_hints), custom_qos,
-      options);
-  }
+  return create_subscription(
+    impl_->required_interfaces_, base_topic, callback,
+    getTransportOrDefault(transport_hints), custom_qos,
+    options);
 }
 
 Subscriber ImageTransport::subscribe(
@@ -242,17 +226,10 @@ Subscriber ImageTransport::subscribe(
   (void) tracked_object;
   rmw_qos_profile_t custom_qos = rmw_qos_profile_default;
   custom_qos.depth = queue_size;
-  if (impl_->node_ != nullptr) {
-    return create_subscription(
-      impl_->node_.get(), base_topic, callback,
-      getTransportOrDefault(transport_hints), custom_qos,
-      options);
-  } else {
-    return create_subscription(
-      impl_->required_interfaces_, base_topic, callback,
-      getTransportOrDefault(transport_hints), custom_qos,
-      options);
-  }
+  return create_subscription(
+    impl_->required_interfaces_, base_topic, callback,
+    getTransportOrDefault(transport_hints), custom_qos,
+    options);
 }
 
 CameraPublisher ImageTransport::advertiseCamera(
@@ -263,11 +240,7 @@ CameraPublisher ImageTransport::advertiseCamera(
   (void) latch;
   rmw_qos_profile_t custom_qos = rmw_qos_profile_default;
   custom_qos.depth = queue_size;
-  if (impl_->node_ != nullptr) {
-    return create_camera_publisher(impl_->node_.get(), base_topic, custom_qos);
-  } else {
-    return create_camera_publisher(impl_->required_interfaces_, base_topic, custom_qos);
-  }
+  return create_camera_publisher(impl_->required_interfaces_, base_topic, custom_qos);
 }
 
 CameraSubscriber ImageTransport::subscribeCamera(
@@ -279,15 +252,9 @@ CameraSubscriber ImageTransport::subscribeCamera(
   (void) tracked_object;
   rmw_qos_profile_t custom_qos = rmw_qos_profile_default;
   custom_qos.depth = queue_size;
-  if (impl_->node_ != nullptr) {
-    return create_camera_subscription(
-      impl_->node_.get(), base_topic, callback,
-      getTransportOrDefault(transport_hints), custom_qos);
-  } else {
-    return create_camera_subscription(
-      impl_->required_interfaces_, base_topic, callback,
-      getTransportOrDefault(transport_hints), custom_qos);
-  }
+  return create_camera_subscription(
+    impl_->required_interfaces_, base_topic, callback,
+    getTransportOrDefault(transport_hints), custom_qos);
 }
 
 std::vector<std::string> ImageTransport::getDeclaredTransports() const
@@ -304,13 +271,8 @@ std::string ImageTransport::getTransportOrDefault(const TransportHints * transpo
 {
   std::string ret;
   if (nullptr == transport_hints) {
-    if (impl_->node_ != nullptr) {
-      TransportHints th(impl_->node_.get());
-      return th.getTransport();
-    } else {
-      TransportHints th(impl_->required_interfaces_);
-      return th.getTransport();
-    }
+    TransportHints th(impl_->required_interfaces_);
+    return th.getTransport();
   } else {
     ret = transport_hints->getTransport();
   }
