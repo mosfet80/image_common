@@ -139,8 +139,7 @@ protected:
     const sensor_msgs::msg::Image & message,
     const PublisherT & publisher) const
   {
-    // Fallback to old, deprecated method
-    publish(message, bindInternalPublisher(publisher.get()));
+    publish(message, publisher);
   }
 
   /**
