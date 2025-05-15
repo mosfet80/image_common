@@ -133,23 +133,6 @@ protected:
   typedef std::function<void (const M &)> PublishFn;
 
   /**
-   * \brief Publish an image using the specified publish function.
-   *
-   * \deprecated Use publish(const sensor_msgs::msg::Image&, const PublisherT&) instead.
-   *
-   * The PublishFn publishes the transport-specific message type. This indirection allows
-   * SimpleSubscriberPlugin to use this function for both normal broadcast publishing and
-   * single subscriber publishing (in subscription callbacks).
-   */
-  virtual void publish(
-    const sensor_msgs::msg::Image & /*message*/,
-    const PublishFn & /*publish_fn*/) const
-  {
-    throw std::logic_error(
-      "publish(const sensor_msgs::msg::Image&, const PublishFn&) is not implemented.");
-  }
-
-  /**
    * \brief Publish an image using the specified publisher.
    */
   virtual void publish(
