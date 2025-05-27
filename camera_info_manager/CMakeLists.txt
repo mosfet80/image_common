@@ -58,10 +58,18 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 
-  #TODO(mjcarroll) Enable unit test with rostest
-  #add_executable(unit_test tests/unit_test.cpp)
-  #target_link_libraries(unit_test ${PROJECT_NAME})
-  #add_rostest(tests/unit_test.test DEPENDENCIES unit_test)
+  ament_add_gtest(${PROJECT_NAME}-unit_test
+    tests/unit_test.cpp
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  )
+  target_link_libraries(${PROJECT_NAME}-unit_test
+    ${PROJECT_NAME}
+    ${sensor_msgs_TARGETS}
+    rclcpp::rclcpp
+  )
+
+  # copy the file in the installation folder to test with package://
+  install(FILES tests/test_calibration.yaml DESTINATION share/${PROJECT_NAME}/tests)
 endif()
 
 ament_package()
