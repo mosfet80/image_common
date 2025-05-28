@@ -47,34 +47,12 @@
 namespace image_transport
 {
 
-/*!
- * \brief Advertise an image topic, free function version.
- */
-IMAGE_TRANSPORT_PUBLIC
-Publisher create_publisher(
-  rclcpp::Node * node,
-  const std::string & base_topic,
-  rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
-  rclcpp::PublisherOptions options = rclcpp::PublisherOptions());
-
 IMAGE_TRANSPORT_PUBLIC
 Publisher create_publisher(
   RequiredInterfaces node_interfaces,
   const std::string & base_topic,
   rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
   rclcpp::PublisherOptions options = rclcpp::PublisherOptions());
-
-/**
- * \brief Subscribe to an image topic, free function version.
- */
-IMAGE_TRANSPORT_PUBLIC
-Subscriber create_subscription(
-  rclcpp::Node * node,
-  const std::string & base_topic,
-  const Subscriber::Callback & callback,
-  const std::string & transport,
-  rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
-  rclcpp::SubscriptionOptions options = rclcpp::SubscriptionOptions());
 
 /**
  * \brief Subscribe to an image topic, free function version.
@@ -93,32 +71,10 @@ Subscriber create_subscription(
  */
 IMAGE_TRANSPORT_PUBLIC
 CameraPublisher create_camera_publisher(
-  rclcpp::Node * node,
-  const std::string & base_topic,
-  rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
-  rclcpp::PublisherOptions pub_options = rclcpp::PublisherOptions());
-
-/*!
- * \brief Advertise a camera, free function version.
- */
-IMAGE_TRANSPORT_PUBLIC
-CameraPublisher create_camera_publisher(
   RequiredInterfaces node_interfaces,
   const std::string & base_topic,
   rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
   rclcpp::PublisherOptions pub_options = rclcpp::PublisherOptions());
-
-
-/*!
- * \brief Subscribe to a camera, free function version.
- */
-IMAGE_TRANSPORT_PUBLIC
-CameraSubscriber create_camera_subscription(
-  rclcpp::Node * node,
-  const std::string & base_topic,
-  const CameraSubscriber::Callback & callback,
-  const std::string & transport,
-  rmw_qos_profile_t custom_qos = rmw_qos_profile_default);
 
 /*!
  * \brief Subscribe to a camera, free function version.
@@ -150,9 +106,6 @@ public:
   using VoidPtr = std::shared_ptr<void>;
   using ImageConstPtr = sensor_msgs::msg::Image::ConstSharedPtr;
   using CameraInfoConstPtr = sensor_msgs::msg::CameraInfo::ConstSharedPtr;
-
-  IMAGE_TRANSPORT_PUBLIC
-  explicit ImageTransport(rclcpp::Node::SharedPtr node);
 
   IMAGE_TRANSPORT_PUBLIC
   explicit ImageTransport(RequiredInterfaces node_interfaces);

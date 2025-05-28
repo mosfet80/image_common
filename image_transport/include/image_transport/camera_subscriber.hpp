@@ -72,14 +72,6 @@ public:
 
   IMAGE_TRANSPORT_PUBLIC
   CameraSubscriber(
-    rclcpp::Node * node,
-    const std::string & base_topic,
-    const Callback & callback,
-    const std::string & transport,
-    rmw_qos_profile_t = rmw_qos_profile_default);
-
-  IMAGE_TRANSPORT_PUBLIC
-  CameraSubscriber(
     RequiredInterfaces node_interfaces,
     const std::string & base_topic,
     const Callback & callback,

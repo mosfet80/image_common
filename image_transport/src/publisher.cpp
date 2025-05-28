@@ -163,14 +163,6 @@ Publisher::Publisher(
   }
 }
 
-Publisher::Publisher(
-  rclcpp::Node * node, const std::string & base_topic,
-  PubLoaderPtr loader, rmw_qos_profile_t custom_qos,
-  rclcpp::PublisherOptions options)
-: Publisher(RequiredInterfaces(*node), base_topic, loader, custom_qos, options)
-{
-}
-
 size_t Publisher::getNumSubscribers() const
 {
   if (impl_ && impl_->isValid()) {return impl_->getNumSubscribers();}

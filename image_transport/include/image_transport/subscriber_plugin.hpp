@@ -66,60 +66,6 @@ public:
    * \brief Subscribe to an image topic, version for arbitrary std::function object.
    */
   void subscribe(
-    rclcpp::Node * node, const std::string & base_topic,
-    const Callback & callback,
-    rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
-    rclcpp::SubscriptionOptions options = rclcpp::SubscriptionOptions())
-  {
-    subscribe(RequiredInterfaces(*node), base_topic, callback, custom_qos, options);
-  }
-
-  /**
-   * \brief Subscribe to an image topic, version for bare function.
-   */
-  void subscribe(
-    rclcpp::Node * node, const std::string & base_topic,
-    void (* fp)(const sensor_msgs::msg::Image::ConstSharedPtr &),
-    rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
-    rclcpp::SubscriptionOptions options = rclcpp::SubscriptionOptions())
-  {
-    subscribe(RequiredInterfaces(*node), base_topic,
-        std::function<void(const sensor_msgs::msg::Image::ConstSharedPtr &)>(fp), custom_qos,
-        options);
-  }
-
-  /**
-   * \brief Subscribe to an image topic, version for class member function with bare pointer.
-   */
-  template<class T>
-  void subscribe(
-    rclcpp::Node * node, const std::string & base_topic,
-    void (T::* fp)(const sensor_msgs::msg::Image::ConstSharedPtr &), T * obj,
-    rmw_qos_profile_t custom_qos = rmw_qos_profile_default,
-    rclcpp::SubscriptionOptions options = rclcpp::SubscriptionOptions())
-  {
-    subscribe(RequiredInterfaces(*node), base_topic, std::bind(fp, obj, std::placeholders::_1),
-        custom_qos, options);
-  }
-
-  /**
-   * \brief Subscribe to an image topic, version for class member function with shared_ptr.
-   */
-  template<class T>
-  void subscribe(
-    rclcpp::Node * node, const std::string & base_topic,
-    void (T::* fp)(const sensor_msgs::msg::Image::ConstSharedPtr &),
-    std::shared_ptr<T> & obj,
-    rmw_qos_profile_t custom_qos = rmw_qos_profile_default)
-  {
-    subscribe(RequiredInterfaces(*node), base_topic, std::bind(fp, obj, std::placeholders::_1),
-        custom_qos);
-  }
-
-  /**
-   * \brief Subscribe to an image topic, version for arbitrary std::function object.
-   */
-  void subscribe(
     RequiredInterfaces node_interfaces,
     const std::string & base_topic,
     const Callback & callback,
@@ -202,16 +148,7 @@ public:
   }
 
 protected:
-  /**
-   * \brief Subscribe to an image transport topic. Must be implemented by the subclass.
-   */
-  virtual void subscribeImpl(
-    rclcpp::Node * node,
-    const std::string & base_topic,
-    const Callback & callback,
-    rmw_qos_profile_t custom_qos,
-    rclcpp::SubscriptionOptions options) = 0;
-  /**
+  /*
    * \brief Subscribe to an image transport topic. Must be implemented by the subclass.
    */
   virtual void subscribeImpl(

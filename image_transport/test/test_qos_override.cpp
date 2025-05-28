@@ -35,6 +35,8 @@
 
 #include "image_transport/image_transport.hpp"
 
+#include "utils.hpp"
+
 class TestQosOverride : public ::testing::Test
 {
 protected:
@@ -63,16 +65,25 @@ protected:
 };
 
 TEST_F(TestQosOverride, qos_override_publisher_without_options) {
+  test_rclcpp::RequiredInterfacesTest required_test_interfaces(*pub_node_);
+  test_rclcpp::RequiredInterfacesTest required_test_qos_override_interfaces(
+    *qos_override_pub_node_);
+
   auto pub =
-    image_transport::create_publisher(pub_node_.get(), "camera/image", rmw_qos_profile_default);
-  auto endpoint_info_vec = pub_node_->get_publishers_info_by_topic("camera/image");
+    image_transport::create_publisher(required_test_interfaces, "camera/image",
+    rmw_qos_profile_default);
+  auto endpoint_info_vec =
+    required_test_interfaces.get_node_graph_interface()->get_publishers_info_by_topic(
+    "camera/image");
   EXPECT_EQ(endpoint_info_vec[0].qos_profile().reliability(), rclcpp::ReliabilityPolicy::Reliable);
   pub.shutdown();
 
   pub = image_transport::create_publisher(
-    qos_override_pub_node_.get(), "camera/image", rmw_qos_profile_default);
+    required_test_qos_override_interfaces, "camera/image", rmw_qos_profile_default);
 
-  endpoint_info_vec = qos_override_pub_node_->get_publishers_info_by_topic("camera/image");
+  endpoint_info_vec =
+    required_test_qos_override_interfaces.get_node_graph_interface()->get_publishers_info_by_topic(
+    "camera/image");
   EXPECT_EQ(
     endpoint_info_vec[0].qos_profile().reliability(),
     rclcpp::ReliabilityPolicy::Reliable);
@@ -88,17 +99,21 @@ TEST_F(TestQosOverride, qos_override_publisher_with_options) {
     rclcpp::QosPolicyKind::History,
     rclcpp::QosPolicyKind::Reliability,
   });
-
+  test_rclcpp::RequiredInterfacesTest required_test_interfaces(*pub_node_);
   auto pub = image_transport::create_publisher(
-    pub_node_.get(), "camera/image", rmw_qos_profile_default, options);
+    required_test_interfaces, "camera/image", rmw_qos_profile_default, options);
   auto endpoint_info_vec = pub_node_->get_publishers_info_by_topic("camera/image");
   EXPECT_EQ(endpoint_info_vec[0].qos_profile().reliability(), rclcpp::ReliabilityPolicy::Reliable);
   pub.shutdown();
 
+  test_rclcpp::RequiredInterfacesTest required_test_qos_override_interfaces(
+    *qos_override_pub_node_);
   pub = image_transport::create_publisher(
-    qos_override_pub_node_.get(), "camera/image", rmw_qos_profile_default, options);
+    required_test_qos_override_interfaces, "camera/image", rmw_qos_profile_default, options);
 
-  endpoint_info_vec = qos_override_pub_node_->get_publishers_info_by_topic("camera/image");
+  endpoint_info_vec =
+    required_test_qos_override_interfaces.get_node_graph_interface()->get_publishers_info_by_topic(
+    "camera/image");
   EXPECT_EQ(
     endpoint_info_vec[0].qos_profile().reliability(),
     rclcpp::ReliabilityPolicy::BestEffort);
@@ -109,16 +124,21 @@ TEST_F(TestQosOverride, qos_override_subscriber_without_options) {
   std::function<void(const sensor_msgs::msg::Image::ConstSharedPtr & msg)> fcn =
     [](const auto & msg) {(void)msg;};
 
+  test_rclcpp::RequiredInterfacesTest required_test_interfaces(*sub_node_);
   auto sub = image_transport::create_subscription(
-    sub_node_.get(), "camera/image", fcn, "raw", rmw_qos_profile_default);
+    required_test_interfaces, "camera/image", fcn, "raw", rmw_qos_profile_default);
   auto endpoint_info_vec = sub_node_->get_subscriptions_info_by_topic("camera/image");
   EXPECT_EQ(endpoint_info_vec[0].qos_profile().reliability(), rclcpp::ReliabilityPolicy::Reliable);
   sub.shutdown();
 
+  test_rclcpp::RequiredInterfacesTest required_test_qos_override_interfaces(
+    *qos_override_pub_node_);
   sub = image_transport::create_subscription(
-    qos_override_sub_node_.get(), "camera/image", fcn, "raw", rmw_qos_profile_default);
+    required_test_qos_override_interfaces, "camera/image", fcn, "raw", rmw_qos_profile_default);
 
-  endpoint_info_vec = qos_override_sub_node_->get_subscriptions_info_by_topic("camera/image");
+  endpoint_info_vec =
+    required_test_qos_override_interfaces.get_node_graph_interface()->
+    get_subscriptions_info_by_topic("camera/image");
   EXPECT_EQ(
     endpoint_info_vec[0].qos_profile().reliability(),
     rclcpp::ReliabilityPolicy::Reliable);
@@ -137,16 +157,26 @@ TEST_F(TestQosOverride, qos_override_subscriber_with_options) {
     rclcpp::QosPolicyKind::Reliability,
   });
 
+  test_rclcpp::RequiredInterfacesTest required_test_interfaces(*sub_node_);
   auto sub = image_transport::create_subscription(
-    sub_node_.get(), "camera/image", fcn, "raw", rmw_qos_profile_default, options);
-  auto endpoint_info_vec = sub_node_->get_subscriptions_info_by_topic("camera/image");
+    required_test_interfaces, "camera/image", fcn, "raw", rmw_qos_profile_default, options);
+  auto endpoint_info_vec =
+    required_test_interfaces.get_node_graph_interface()->get_subscriptions_info_by_topic(
+    "camera/image");
   EXPECT_EQ(endpoint_info_vec[0].qos_profile().reliability(), rclcpp::ReliabilityPolicy::Reliable);
   sub.shutdown();
 
+  test_rclcpp::RequiredInterfacesTest required_test_qos_override_interfaces(
+    *qos_override_sub_node_);
   sub = image_transport::create_subscription(
-    qos_override_sub_node_.get(), "camera/image", fcn, "raw", rmw_qos_profile_default, options);
+    required_test_qos_override_interfaces, "camera/image", fcn, "raw", rmw_qos_profile_default,
+    options);
 
-  endpoint_info_vec = qos_override_sub_node_->get_subscriptions_info_by_topic("camera/image");
+  endpoint_info_vec =
+    required_test_qos_override_interfaces.get_node_graph_interface()->
+    get_subscriptions_info_by_topic("camera/image");
+
+  std::cout << "endpoint_info_vec[0].node_name() " << endpoint_info_vec[0].node_name() << std::endl;
   EXPECT_EQ(
     endpoint_info_vec[0].qos_profile().reliability(),
     rclcpp::ReliabilityPolicy::BestEffort);
