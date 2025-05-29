@@ -29,7 +29,9 @@
 
 #include <gtest/gtest.h>
 
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include <chrono>
 #include <filesystem>
