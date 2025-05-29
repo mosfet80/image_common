@@ -637,7 +637,7 @@ TEST_F(CameraInfoManagerTesting, rosHome)
   check_url_substitution(node, name_url, exp_url, g_camera_name);
 
   // resolve ${ROS_HOME} with environment variable defined
-  setenv("ROS_HOME", "/my/ros/home", true);
+  rcpputils::set_env_var("ROS_HOME", "/my/ros/home");
   name_url = "file://${ROS_HOME}/camera_info/test_camera.yaml";
   exp_url = "file:///my/ros/home/camera_info/test_camera.yaml";
   check_url_substitution(node, name_url, exp_url, g_camera_name);
