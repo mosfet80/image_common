@@ -65,6 +65,7 @@ class SimpleSubscriberPlugin : public SubscriberPlugin
 public:
   virtual ~SimpleSubscriberPlugin() {}
 
+  /// \brief Returns the transport-specific topic name being subscribed to.
   std::string getTopic() const override
   {
     if (impl_) {
@@ -73,6 +74,7 @@ public:
     return std::string();
   }
 
+  /// \brief Returns the number of publishers on the transport-specific topic.
   size_t getNumPublishers() const override
   {
     if (impl_) {
@@ -81,6 +83,7 @@ public:
     return 0;
   }
 
+  /// \brief Destroy the internal subscription and release resources.
   void shutdown() override
   {
     impl_.reset();
