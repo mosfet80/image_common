@@ -41,6 +41,7 @@ This is very similar to the
 
 """
 
+from collections.abc import Iterable
 import errno
 import locale
 import os
@@ -201,7 +202,9 @@ class CameraInfoManager:
 
     """
 
-    def __init__(self, node: Node, cname='camera', url='', namespace=''):
+    def __init__(
+        self, node: Node, cname: str = 'camera', url: str = '', namespace: str = ''
+    ) -> None:
         """
         Initialise the manager and advertise the set_camera_info service.
 
@@ -215,7 +218,7 @@ class CameraInfoManager:
         self.node = node
         self.cname = cname
         self.url = url
-        self.camera_info = None
+        self.camera_info: CameraInfo | None = None
 
         # advertise set_camera_info service
         service_name = 'set_camera_info'
@@ -224,7 +227,7 @@ class CameraInfoManager:
         self.node.get_logger().debug(f'{service_name} service declared')
         self.svc = self.node.create_service(SetCameraInfo, service_name, self.setCameraInfo)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Return string representation of CameraInfoManager.
 
@@ -232,7 +235,7 @@ class CameraInfoManager:
         """
         return f'[{self.cname}]{self.url}'
 
-    def getCameraInfo(self):
+    def getCameraInfo(self) -> CameraInfo:
         """
         Get the current camera calibration.
 
@@ -249,7 +252,7 @@ class CameraInfoManager:
             raise CameraInfoMissingError('Calibration missing, loadCameraInfo() needed.')
         return self.camera_info
 
-    def getCameraName(self):
+    def getCameraName(self) -> str:
         """
         Get the current camera name.
 
@@ -257,7 +260,7 @@ class CameraInfoManager:
         """
         return self.cname
 
-    def getURL(self):
+    def getURL(self) -> str:
         """
         Get the current calibration URL.
 
@@ -265,7 +268,7 @@ class CameraInfoManager:
         """
         return self.url
 
-    def isCalibrated(self):
+    def isCalibrated(self) -> bool:
         """
         Determine whether the current CameraInfo is calibrated.
 
@@ -281,9 +284,9 @@ class CameraInfoManager:
         """
         if self.camera_info is None:
             raise CameraInfoMissingError('Calibration missing, loadCameraInfo() needed.')
-        return self.camera_info.k[0] != 0.0
+        return bool(self.camera_info.k[0] != 0.0)
 
-    def _loadCalibration(self, url, cname):
+    def _loadCalibration(self, url: str, cname: str) -> None:
         """
         Load calibration data (if any available).
 
@@ -321,7 +324,7 @@ class CameraInfoManager:
             self.node.get_logger().error(f'Invalid camera calibration URL: {resolved_url}')
             self.camera_info = CameraInfo()
 
-    def loadCameraInfo(self):
+    def loadCameraInfo(self) -> None:
         """
         Load currently configured calibration data (if any).
 
@@ -335,7 +338,9 @@ class CameraInfoManager:
         """
         self._loadCalibration(self.url, self.cname)
 
-    def setCameraInfo(self, req, rsp):
+    def setCameraInfo(
+        self, req: SetCameraInfo.Request, rsp: SetCameraInfo.Response
+    ) -> SetCameraInfo.Response:
         """
         Set camera info request callback.
 
@@ -354,7 +359,7 @@ class CameraInfoManager:
             rsp.status_message = 'Error storing camera calibration.'
         return rsp
 
-    def setCameraName(self, cname):
+    def setCameraName(self, cname: str) -> bool:
         """
         Set a new camera name.
 
@@ -381,7 +386,7 @@ class CameraInfoManager:
             self.camera_info = None  # missing if name changed
         return True
 
-    def setURL(self, url):
+    def setURL(self, url: str) -> bool:
         """
         Set the calibration URL.
 
@@ -407,7 +412,7 @@ class CameraInfoManager:
 # related utility functions
 
 
-def genCameraName(from_string):
+def genCameraName(from_string: str) -> str:
     """
     Generate a valid camera name.
 
@@ -426,7 +431,7 @@ def genCameraName(from_string):
     return ''.join(c if c.isalnum() or c == '_' else '_' for c in from_string)
 
 
-def getPackageFileName(url):
+def getPackageFileName(url: str) -> str:
     """
     Get the filesystem path corresponding to a ``package:`` URL.
 
@@ -453,7 +458,7 @@ def getPackageFileName(url):
     return pkgPath
 
 
-def loadCalibrationFile(filename, cname):
+def loadCalibrationFile(filename: str, cname: str) -> CameraInfo:
     """
     Load calibration data from a file.
 
@@ -494,7 +499,7 @@ def loadCalibrationFile(filename, cname):
     return ci
 
 
-def parseURL(url):
+def parseURL(url: str) -> int:
     """
     Parse a calibration URL and return its type code.
 
@@ -519,7 +524,7 @@ def parseURL(url):
     return URL_invalid
 
 
-def resolveURL(url, cname):
+def resolveURL(url: str, cname: str) -> str:
     """
     Resolve substitution strings in Uniform Resource Locator.
 
@@ -579,7 +584,7 @@ def resolveURL(url, cname):
         rest = dollar + 1
 
 
-def saveCalibration(new_info, url, cname):
+def saveCalibration(new_info: CameraInfo, url: str, cname: str) -> bool:
     """
     Save calibration data.
 
@@ -634,7 +639,7 @@ def saveCalibration(new_info, url, cname):
     return success
 
 
-def saveCalibrationFile(ci, filename, cname):
+def saveCalibrationFile(ci: CameraInfo, filename: str, cname: str) -> bool:
     """
     Save calibration data to a YAML file.
 
@@ -649,7 +654,7 @@ def saveCalibrationFile(ci, filename, cname):
     # CameraInfo numeric fields are array.array or numpy arrays on the rclpy side,
     # whose elements (numpy.float64) PyYAML's SafeDumper cannot represent; coerce
     # to plain Python floats before dumping.
-    def _to_floats(seq):
+    def _to_floats(seq: Iterable[float]) -> list[float]:
         return [float(x) for x in seq]
 
     calib = {
@@ -708,3 +713,6 @@ def saveCalibrationFile(ci, filename, cname):
                         f'file [{filename}] not accessible'
                     )
                     return False  # fail if unable to write file
+
+        # any other OSError (unexpected errno) means the file could not be saved
+        return False
